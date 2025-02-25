@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.member.MemberMapper">
+	<select id="useridChk" resultType="Integer">
+		select count(*) from member where userid = #{userid}
+	</select>
+	
+	<insert id="memberOk" parameterType="com.example.demo.member.MemberDto">
+		insert into member (userid,name,pwd,email,phone,writeday)
+		values (#{userid},#{name},#{pwd},#{email},#{phone},now())
+	</insert>
+	
+		
+	<select id="cartView" resultType="com.example.demo.dto.ProductDto">
+		select p.pimg, p.title, p.price, p.halin, p.juk, p.baeprice, p.pcode,
+		p.baeday, c.su, c.id, c.writeday, if(c.writeday=curdate() , 1, 0) as wchk from cart as c inner join product as p
+		on c.pcode = p.pcode where userid=#{userid}
+	</select>
+	
+	<delete id="cartDel">
+		delete from cart
+		where id=#{id}
+	</delete>
+	
+	<update id="chgSu">
+		update cart
+		set su = #{num}
+		where id=#{id}
+	</update>
+	
+	<select id="getProduct" resultType="com.example.demo.dto.ProductDto">
+	 	select pcode,pimg,title,price,halin,juk,baeprice, baeday 
+	 	from product where pcode=#{pcode}
+	</select>
+	
+	<select id="jjimList" resultType="com.example.demo.dto.ProductDto">
+		select p.pimg, p.baeprice, p.title,
+		(p.price-(p.price*p.halin/100)) as price, j.id, j.pcode
+		from jjim as j inner join product as p 
+		on j.pcode = p.pcode
+		where userid=#{userid}
+	</select>
+	
+	<delete id="jjimDel">
+		delete from jjim
+		where id=#{id}
+	</delete>
+	
+	<insert id="addCart">
+		insert into cart (userid,pcode,su,writeday)
+		values (#{userid},#{pcode},1,now())
+	</insert>
+	
+	<select id="getCartSu" resultType="String">
+		select count(*) from cart 
+		where userid=#{userid}
+	</select>
+	
+	<select id="isCart" resultType="Boolean">
+		select count(*) from cart 
+		where userid=#{userid} and pcode=#{pcode}
+	</select>
+	
+	<update id="upCart">
+		update cart set
+		su = su + 1 , writeday = now()
+		where userid=#{userid} and pcode=#{pcode}
+	</update>
+	
+	<select id="jumunList" resultType="HashMap">
+		select g.id, g.review, g.writeday, b.name, g.state, p.pimg, p.title,p.pcode, b.juso
+		from product as p inner join gumae as g on p.pcode = g.pcode
+		inner join baesong as b on g.baeId = b.id
+		where g.userid=#{userid}
+		<if test="month != 1">
+		<![CDATA[and g.writeday >= #{start} and g.writeday <= #{end}]]>
+		</if>
+		order by g.writeday desc
+	</select>
+	
+	<update id="chgState" parameterType="com.example.demo.dto.GumaeDto">
+    	update gumae
+    	set state=#{state}
+    	where id=#{id}
+  </update>
+  
+  <insert id="reviewOk" parameterType="com.example.demo.dto.ReviewDto">
+  	insert into review (userid,pcode,star,title,content,writeday,gid)
+  	values(#{userid},#{pcode},#{star},#{title},#{content},now(),#{id})
+  </insert>
+  
+  <update id="chgReview">
+  	update gumae set review = 1 where id=#{id}
+  </update>
+  
+    <update id="chgReview2">
+  	update gumae set review = 0 where id=#{id}
+  </update>
+  
+  <select id="avgStar" resultType="Double">
+  	select ifnull(sum(star)/count(*),0) from review
+  	where pcode=#{pcode}
+  </select>
+  
+  <select id="getReviewCount" resultType="Integer">
+  	select count(*) from review where pcode=#{pcode}
+  </select>
+  
+  <update id="chgStar">
+    update product set star=#{avg}, review = #{reviewCount}
+    where pcode=#{pcode}
+  </update>
+  
+  	<delete id="reviewDelete">
+		delete from review
+		where id=#{id}
+	</delete>
+	
+	<select id="getReview" resultType="com.example.demo.dto.ReviewDto">
+		select * from review
+		where id=#{id}
+	</select>
+	
+	<update id="reviewUpdateOk">
+		update review 
+		set star=${star}, title = #{title}, content = #{content}
+		where id=#{id} 
+	</update>
+  	
+  	<select id="memberInfo" resultType="com.example.demo.member.MemberDto">
+  		select * from member
+  		where userid=#{userid}
+  	</select>
+  	
+  	<update id="chgEmail">
+  		update member set email=#{email}
+  		where userid=#{userid}
+  	</update>
+  	
+  	<update id="chgPhone">
+  		update member set phone=#{phone}
+  		where userid=#{userid}
+  	</update>
+  	
+  	<select id="isPwd" resultType="Boolean">
+  		select count(*) from member
+  		where userid=#{userid} and pwd=#{pwd} or oldpwd=#{pwd}
+  	</select>
+  	
+  	<update id="chgPwd">
+		update member set oldPwd=#{oldPwd}, pwd=#{nPwd}
+		where userid=#{userid}
+	</update>
+	
+	<select id="baesongList" resultType="com.example.demo.dto.BaesongDto">
+		select * from baesong
+		where userid=#{userid}
+		order by gibon desc, id asc
+	</select>
+	
+	<select id="reviewList" resultType="HashMap">
+	    select r.* , p.title as ptitle 
+	    from product as p inner join review as r
+	    on p.pcode=r.pcode
+	    where userid=#{userid}
+	    order by id desc
+	</select>
+	
+	<select id="qnaList" resultType="HashMap">
+		select id,content,left(writeday,10) as writeday ,ref as r,
+		(select title from product where pcode=qna.pcode) as ptitle,
+		(select content from qna where ref = r and userid ='admin') as adminCnt
+		from qna where userid=#{userid}
+	</select>
+</mapper>

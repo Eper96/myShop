@@ -87,7 +87,7 @@
 		var chk = new XMLHttpRequest();
 		chk.onload = function() {
 			
-			//alert(chk.responseText);
+			alert(chk.responseText);
 			document.getElementById("uform").style.display="none";
 			document.getElementById("uform").name.value="";
 			document.getElementById("uform").email.value="";

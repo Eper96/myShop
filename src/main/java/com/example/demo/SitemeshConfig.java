@@ -24,6 +24,7 @@ public class SitemeshConfig extends ConfigurableSiteMeshFilter{
 	builder.addExcludedPath("/product/baesong*");
         // test의 경로에 있는 문서들은 default가 포함되지 않는다. 
 	builder.addExcludedPath("/member/baesongWrite");
+	builder.addExcludedPath("/javascript/*");
 	}
 }
 

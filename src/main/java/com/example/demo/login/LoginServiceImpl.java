@@ -103,8 +103,8 @@ public class LoginServiceImpl implements LoginService {
 
 	@Override
 	public String getUserid(MemberDto mdto) {
-		String userid = mapper.getUserid(mdto);
-		return userid;
+		//String userid = mapper.getUserid(mdto);
+		return mapper.getUserid(mdto);
 	}
 
 	@Override
